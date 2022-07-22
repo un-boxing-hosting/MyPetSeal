@@ -28,7 +28,7 @@ const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 var cf = require('cloudflare')({
-    email: 'conner2004car@gmail.com',
+    email: config.email,
     key: config.cloud
 });
 //const httpServer = http.createServer(droApp);
@@ -38,7 +38,7 @@ app.use(session({
         return uuid() // use UUIDs for session IDs
     },
     store: new FileStore(),
-    secret: 'keyboard cat',
+    secret: config.secret,
     resave: false,
     saveUninitialized: true
 }))
