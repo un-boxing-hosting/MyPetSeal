@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Allow: /pets
+Allow: /profile
+Allow: /pix/*
+Disallow: /login
+Disallow: /api/*
+Allow: /favicon.ico
+Allow: /robots.txt
+Allow: /sitemap.xml
+
+Sitemap: https://www.mypetseal.com/sitemap.xml
