@@ -12,7 +12,7 @@ window.onload = async function () {
     });;
     /*
     if (jsonUser.name == "no user") {
-        document.getElementById("login").innerText = "login"
+        document.getElementById("login").innerText = "Login"
         var txt = document.getElementById("txt")
         txt.innerText = `${jsonPets.error}`
         txt.href = "https://youtu.be/Mg9JQHxmneU?t=18"

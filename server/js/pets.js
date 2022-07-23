@@ -8,7 +8,7 @@ window.onload = async function () {
     console.log(jsonUser)
     console.log(jsonPets)
     if (jsonUser.name == "no user") {
-        document.getElementById("login").innerText = "login"
+        document.getElementById("login").innerText = "Login"
         var txt = document.getElementById("txt")
         txt.innerText = `${jsonPets.error}`
         txt.href = "https://youtu.be/Mg9JQHxmneU?t=18"

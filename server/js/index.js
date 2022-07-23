@@ -4,7 +4,7 @@ window.onload = async function () {
     const jsonUser = await resUser.json()
     console.log(jsonUser)
     if (jsonUser.name == "no user") {
-        document.getElementById("login").innerText = "login"
+        document.getElementById("login").innerText = "Login"
     } else {
         document.getElementById("login").innerText = jsonUser.name
         document.getElementById("login").href = "https://mypetseal.com/profile"

@@ -11,7 +11,7 @@ window.onload = async function () {
     //console.log(jsonPets)
     var profile = document.getElementById("profile");
     if (jsonUser.name == "no user") {
-        document.getElementById("login").innerText = "login"
+        document.getElementById("login").innerText = "Login"
     } else {
         document.getElementById("login").innerText = jsonUser.name
         document.getElementById("login").href = "https://mypetseal.com/profile"
