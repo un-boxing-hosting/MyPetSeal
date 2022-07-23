@@ -1,9 +1,8 @@
 # MyPetSeal
-the MyPetSeal.com web server
+The MyPetSeal web server!
 
-seal pix are hand picked by us (if you want more add pls send it :) )
-useing [fluxpoint](https://github.com/FluxpointDev) [gallrey](https://github.com/FluxpointDev/Gallery) api
+MyPetSeal is a website where the homepage gives you a random seal picture every minute (Provided by [Fluxpoint](https://github.com/FluxpointDev)'s [Gallery](https://github.com/FluxpointDev/Gallery) API). The site also allows you to take care of a pet seal after logging in, letting you feed the seal to maintain it's happiness.
 
-MyPetSeal is created and maintained by un boxing hosting
- 
- this web server is being run with a proxy server
+This is being worked on constantly by [un boxing hosting](https://github.com/un-boxing-hosting) owners [un boxing man](https://github.com/un-boxing-man) and [Drogoton](https://github.com/Drogoton). 
+We appreciate the feedback!
+https://mypetseal.com
