@@ -1,10 +1,13 @@
 //#region constants
+const bot = require(`./MyPetSeal-bot.js`).bot;
+
 const hostname = `https://mypetseal.com`
 const dirname = `MyPetSeal/server`;
 const config = require(`./config/config.json`);
 const PORT = 8093;
 const util = require(`@un-boxing-hosting/boxing-hosting-utils`)
-const utils = new util();
+const utils = new util.Client();
+//const db = new util.db(config.db);
 const list = utils.getIDList();
 const stafflist = utils.getStaffList();
 //const fetch = require(`node-fetch`);
@@ -51,6 +54,7 @@ app.use(express.urlencoded({
 app.set(`view engine`, `ejs`);
 app.set(`trust proxy`, true);
 //#endregion
+
 setInterval(async () => {
         const res = await wump("https://gallery.fluxpoint.dev/api/album/66", {
             headers: {
@@ -77,11 +81,11 @@ app.get('/api/bg', async (req, res) => {
         }).send()
 
         const json = await ress.json()
-        console.log(json.file)
+       // console.log(json.file)
         db.set(`background`, json.file)
     }
     var bg1 = db.get(`background`)
-    console.log(bg1)
+  //  console.log(bg1)
     res.send({
         img: bg1
     })
@@ -109,6 +113,7 @@ app.get("/api/user/*", (req, res) => {
         }
         var user = db.get(req.user.email)
         console.log(user)
+
         if (user.discord !== undefined && user.discord !== null) {
             res.send({
                 name: user.discord.name,
@@ -178,53 +183,80 @@ app.get("/api/pets/*", async (req, res) => {
     var user = db.get(req.user.email)
     var pets = db.get(req.user.email).pets
     var url = req.url.split("/")
-    console.log(pets)
-    console.log(url[3])
+   // console.log(pets)
+    //console.log(url[3])
 
     switch (url[3]) {
+        case "del-public":
+            db.delete(`public_pets`)
+            res.send("Deleted")
+            break
         case "public":
             var public = db.get(`public_pets`)
+            var public_pets = []
+
+              public.forEach(async email => {
+                updateHappy(email)
+                var user = db.get(email)
+                var owner = getName(user) 
+                //console.log(petsNew)
+                if (user.pets != undefined) {
+                    public_pets.push({
+                        owner: owner.name,
+                        pets: user.pets
+                    })
+                }
+            })
+            //console.log(public_pets)
             res.send({
-                pets: public
+                pets: public_pets
             })
             break
         case "setpublic":
-            var public = db.get(`public_pets`)
+            //db.delete(`public_pets`)
             //get user.dicord.name if undefined get user.google.name
-            var name = getName(user).name
+            var owner = getName(user)
             var public = db.get(`public_pets`)
 
-
-
-
-            db.push(`public_pets`, {
-                owner: name,
-                pets: pets
-            })
+            if (public != null) {
+                if (public.includes(owner.email)) {
+                    res.send({
+                        success: false,
+                    })
+                    return;
+                }
+            }
+            db.set(`${owner.email}.pets.public`, true)
+            db.push(`public_pets`, owner.email)
             res.send({
                 success: true
             })
             break;
+        case "removepublic":
+            var public = db.get(`public_pets`)
+            if (public.includes(user.email)) {
+                db.remove(`public_pets`, user.email)
+            }
+
+            db.set(`${user.email}.pets.public`, false)
+
+            res.send({
+                success: true
+            })
+
+            break;
 
         default:
-            if (db.get(`${req.user.email}.pets.happy`) == undefined) {
-                db.set(`${req.user.email}.pets.happy`, 100)
-            }
-            if (db.get(`${req.user.email}.pets.time`) == undefined) {
-                db.set(`${req.user.email}.pets.time`, getTime())
-            }
-            var newHapy = await getFood(req.user.email);
-            console.log(newHapy)
-            db.set(`${req.user.email}.pets.happy`, newHapy)
-            console.log(getTime())
-            db.set(`${req.user.email}.pets.time`, getTime())
+            var petsNew = await updateHappy(req.user.email)
+           // console.log(petsNew)
+           
             if (pets == null) {
                 res.send({
                     pets: "not found"
                 })
                 return;
             }
-            res.send(pets)
+            res.send(petsNew)
             //console.log()
             //res.send("pet")
     }
@@ -232,9 +264,12 @@ app.get("/api/pets/*", async (req, res) => {
 })
 app.post("/api/pets/*", async (req, res) => {
     // var user = db.get(req.user.email)
+    if (req.user == undefined) {
+        return;
+    }
     var pets = db.get(`${req.user.email}.pets`)
     var url = req.url.split("/")
-    console.log(url[3])
+    //console.log(url[3])
 
     switch (url[3]) {
         case "add":
@@ -252,7 +287,7 @@ app.post("/api/pets/*", async (req, res) => {
         case "name":
 
             //console.log(req)
-            console.log(req.body)
+           // console.log(req.body)
             db.set(`${req.user.email}.pets.name`, req.body.name)
             res.redirect(`/pets`)
             break;
@@ -308,7 +343,7 @@ app.get('/google/callback',
     }),
     function (req, res) {
         var user = db.get(req.user.email)
-        console.log(req.user)
+      //  console.log(req.user)
 
         db.set(`${req.user.email}.google`, {
             id: req.user.sub,
@@ -326,16 +361,18 @@ app.get('/discord/callback',
         failureRedirect: '/failed',
     }),
     function (req, res) {
-        var user = db.get(req.user.email)
-        if (user !== null) {
+       // var user = db.get(req.user.email)
+        
+            
             db.set(`${req.user.email}.discord`, {
                 id: req.user.id,
                 name: req.user.username,
                 avatar: req.user.avatar,
                 email: req.user.email
             })
-        }
-        // console.log(req.user)
+            db.set(`${req.user.id}`, req.user.email)
+        
+         console.log(req.user)
         res.redirect('/')
 
     }
@@ -366,6 +403,7 @@ app.get(`*`, function (req, res) {
 function getName(user) {
     if (user.discord !== undefined && user.discord !== null) {
         var send = {
+            email: user.discord.email,
             name: user.discord.name,
             id: user.discord.id
         }
@@ -373,6 +411,7 @@ function getName(user) {
     }
     if (user.google != undefined && user.google != null) {
         var send = {
+            email: user.google.email,
             name: user.google.name,
             id: user.google.id
         }
@@ -390,7 +429,7 @@ function getTime() {
     var min = t.getMinutes();
     var s = t.getSeconds();
     var time = `${y}-${m + 1}-${d} ${h}:${min}:${s}`
-    console.log(time)
+    //console.log(time)
     return time;
 }
 
@@ -406,7 +445,7 @@ async function getFood(email) {
     var user = db.get(email)
     var happy = user.pets.happy
     var time = new Date(user.pets.time) //user.pets.time
-    console.log(time)
+  //  console.log(time)
     var sub = timeNow - time
     var days = Math.floor(sub / day);
     var hours = Math.floor((sub % day) / hour);
@@ -416,14 +455,14 @@ async function getFood(email) {
     } else {
         console.log(hours)
         var newh = Math.floor(hours * 2)
-        console.log(hours + " new")
-        console.log(happy)
+        //console.log(hours + " new")
+       // console.log(happy)
         var newHappy = Math.floor(happy - newh)
     }
 
     // subtract 2 for evey hour
     console.log(newHappy)
-   return newHappy
+    return newHappy
 }
 
 async function getSeal() {
@@ -436,6 +475,21 @@ async function getSeal() {
     const json = await ress.json()
     console.log(json.file)
     return json.file
+}
+async function  updateHappy(email){
+     if (db.get(`${email}.pets.happy`) == undefined) {
+         db.set(`${email}.pets.happy`, 100)
+     }
+     if (db.get(`${email}.pets.time`) == undefined) {
+         db.set(`${email}.pets.time`, getTime())
+     }
+     var newHapy = await getFood(email);
+    // console.log(newHapy)
+     db.set(`${email}.pets.happy`, newHapy)
+    // console.log(getTime())
+     db.set(`${email}.pets.time`, getTime())
+     var petsNew = db.get(email).pets
+     return await petsNew;
 }
 
 passport.use(new GoogleStrategy({

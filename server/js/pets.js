@@ -44,6 +44,7 @@ window.onload = async function () {
 
         const pets = document.getElementById("petss");
         var public = document.createElement("button");
+        public.id = "public";
         const div = document.createElement("div");
         div.id = "div";
         public.innerText = "Public Pets";
@@ -59,21 +60,26 @@ window.onload = async function () {
 
             private.onclick = async function () {
                 pets.removeChild(private);
-                pets.appendChild(public);
-                pets.removeChild(div);
+
+                deletePub();
                 pet(jsonPets)
             }
             pets.appendChild(private);
             json.pets.forEach(pet => {
+                console.log(pet)
 
 
                 var img = document.createElement("img");
                 var happy = document.createElement("p");
                 var owner = document.createElement("p");
                 owner.innerHTML = "Owner: " + pet.owner;
+                owner.id = "owner";
                 happy.innerHTML = "Happiness: " + pet.pets.happy + "/100";
+                happy.id = "happy";
                 img.src = pet.pets.img;
+                img.id = "img";
                 var name = document.createElement("p");
+                name.id = "name";
                 name.innerHTML = pet.pets.name;
                 name.style.fontSize = "30px";
                 pets.appendChild(div);
@@ -84,9 +90,9 @@ window.onload = async function () {
             })
             pets.removeChild(public);
         }
-        //pets.appendChild(public);
+        pets.appendChild(public);
         private.onclick = async function () {
-            //  document.getElementById("div").delete();
+            //deletePub();
             pets.removeChild(private);
             pet(jsonPets)
         }
@@ -97,21 +103,79 @@ window.onload = async function () {
 
     }
 }
+async function deletePub() {
+    //  document.getElementById("public").remove();
+    document.getElementById("name").remove();
+    document.getElementById("happy").remove();
+    document.getElementById("owner").remove();
+    document.getElementById("img").remove();
+    document.getElementById("div").remove();
+
+}
+async function deletePriv() {
+
+    document.getElementById("name").remove();
+    document.getElementById("happy").remove();
+    document.getElementById("img").remove();
+    document.getElementById("nameForm").remove();
+    document.getElementById("nameInput").remove();
+    document.getElementById("sub").remove();
+    document.getElementById("pdiv").remove();
+
+}
+
 async function pet(jsonPets) {
+    const publicc = document.createElement("button");
+    publicc.innerText = "Public Pets";
+    publicc.onclick = async function () {
+        window.location.reload();
+    }
     const pets = document.getElementById("petss");
+    pets.appendChild(publicc);
+    if (jsonPets.public == null) {
+        var makepub = document.createElement("button");
+        makepub.innerText = "Make Pet Public";
+        makepub.onclick = async function () {
+            var res = await fetch("https://mypetseal.com/api/pets/setpublic");
+            const json = await res.json()
+            console.log(json)
+            if (json.success == true) {
+                window.location.reload();
+            }
+        }
+        pets.appendChild(makepub);
+    }
+    if (jsonPets.public == true) {
+        var makepub = document.createElement("button");
+        makepub.innerText = "Make Pet Private";
+        makepub.onclick = async function () {
+            var res = await fetch("https://mypetseal.com/api/pets/removepublic");
+            const json = await res.json()
+            console.log(json)
+            if (json.success == true) {
+                window.location.reload();
+            }
+        }
+        pets.appendChild(makepub);
+    }
     var pdiv = document.createElement("div");
     pdiv.id = "pdiv";
     var img = document.createElement("img");
     var happy = document.createElement("p");
+    img.id = "img";
+    happy.id = "happy";
     happy.innerHTML = "Happiness: " + jsonPets.happy + "/100";
     img.src = jsonPets.img;
     var name = document.createElement("p");
+    name.id = "name";
     name.innerHTML = jsonPets.name;
     name.style.fontSize = "30px";
     pets.appendChild(pdiv);
     pdiv.appendChild(name);
     pdiv.appendChild(happy);
     pdiv.appendChild(img);
+
+
 
     var form = document.createElement("form");
     form.action = "/api/pets/name";
@@ -123,10 +187,12 @@ async function pet(jsonPets) {
 
 
     var input = document.createElement("input");
+    input.id = "nameInput";
     input.type = "text";
     input.name = "name";
     input.placeholder = "name";
     var sub = document.createElement("input");
+    sub.id = "sub";
     sub.type = "submit";
     form.appendChild(input);
     form.appendChild(sub);
@@ -148,5 +214,7 @@ async function pet(jsonPets) {
     }
     but.appendChild(name);
     pdiv.appendChild(but);
+
+
 
 }
