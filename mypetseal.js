@@ -4,10 +4,11 @@ const dirname = `MyPetSeal/server`;
 const config = require(`./config/config.json`);
 const PORT = 8093;
 const util = require(`@un-boxing-hosting/boxing-hosting-utils`)
-const utils = new util();
+const utils = new util.Client();
+const db = new util.db(config.db);
 const list = utils.getIDList();
 const stafflist = utils.getStaffList();
-//const fetch = require(`node-fetch`);
+const fetch = require('node-fetch');
 const express = require('express');
 const logger = require(`morgan`);
 const app = express();
@@ -16,7 +17,7 @@ const bodyParser = require("body-parser")
 const fs = require("fs-extra");
 const favicon = require('serve-favicon');
 const httpProxy = require('http-proxy');
-const db = require('quick.db');
+//const db = require('quick.db');
 const wump = require('wumpfetch');
 const {
     json
@@ -59,13 +60,28 @@ setInterval(async () => {
         }).send()
         const json = await res.json()
         console.log(json.file)
-        db.set(`background`, json.file)
+        await db.set(`background`, json.file)
     },
     300000)
+/*
+app.use('*', async (req, res) => {
+    var url = req.baseUrl.split("/")
+   // console.log(`"${url[1]}"`)
+    if (url[1] == "dev") {
+        res.sendFile(`index.html`, {
+            root: dirname
+        })
+    } else {
+        res.sendFile(`/down.html`, {
+            root: dirname
+        })
+    }
+})
 
+*/
 app.get('/api/bg', async (req, res) => {
 
-    var bg = db.get(`background`)
+    var bg = await db.get(`background`)
     // console.log(bg)
     //console.log("ssss")
     if (bg == null) {
@@ -78,9 +94,9 @@ app.get('/api/bg', async (req, res) => {
 
         const json = await ress.json()
         console.log(json.file)
-        db.set(`background`, json.file)
+        await db.set(`background`, json.file)
     }
-    var bg1 = db.get(`background`)
+    var bg1 = await db.get(`background`)
     console.log(bg1)
     res.send({
         img: bg1
@@ -98,16 +114,24 @@ app.get(`/login`, async (req, res) => {
 app.get("/failed", (req, res) => {
     res.send("Failed")
 })
-app.get("/api/user/*", (req, res) => {
+app.get("/api/user/*", async (req, res) => {
     if (req.path.slice(10) == "") {
-        if (req.user == undefined) {
+        if (req.user == null) {
             res.send({
                 name: "no user",
                 id: "no user"
             })
             return;
         }
-        var user = db.get(req.user.email)
+        var user = await db.get(req.user.email)
+        console.log(user)
+        if (user == null) {
+            res.send({
+                name: "no user",
+                id: "no user"
+            })
+            return;
+        }
         console.log(user)
         if (user.discord !== undefined && user.discord !== null) {
             res.send({
@@ -132,7 +156,7 @@ app.get("/api/user/*", (req, res) => {
             })
             return;
         }
-        var user = db.get(req.user.email)
+        var user = await db.get(req.user.email)
         // console.log(user)
         if (user.discord !== undefined) {
             res.send(user)
@@ -158,7 +182,7 @@ app.get("/pets", (req, res) => {
 })
 app.get("/pets/admin", async (req, res) => {
     const staffIDlist = await stafflist;
-    if (staffIDlist.list.includes(db.get(`${req.user.email}.discord.id`))) {
+    if (staffIDlist.list.includes(await db.get(`${req.user.email}.discord.id`))) {
         res.sendFile(`/pets/staff.html`, {
             root: dirname
         })
@@ -175,29 +199,44 @@ app.get("/api/pets/*", async (req, res) => {
         })
         return;
     }
-    var user = db.get(req.user.email)
-    var pets = db.get(req.user.email).pets
+    var user = await db.get(req.user.email)
+    var pets = await db.get(`${req.user.email}.pets`)
     var url = req.url.split("/")
-    console.log(pets)
+    console.log(pets.pets)
     console.log(url[3])
 
     switch (url[3]) {
         case "public":
-            var public = db.get(`public_pets`)
+            var public = await db.get(`public_pets`)
+            var public_pets = []
+
+            public.forEach(async email => {
+                updateHappy(email)
+                var user = await db.get(email)
+                var owner = getName(user)
+                //console.log(petsNew)
+                if (user.pets != undefined) {
+                    public_pets.push({
+                        owner: owner.name,
+                        pets: user.pets
+                    })
+                }
+            })
+            //console.log(public_pets)
             res.send({
-                pets: public
+                pets: public_pets
             })
             break
         case "setpublic":
-            var public = db.get(`public_pets`)
+            var publicp = await db.get(`public_pets`)
             //get user.dicord.name if undefined get user.google.name
             var name = getName(user).name
-            var public = db.get(`public_pets`)
+            var publicp = await db.get(`public_pets`)
 
 
 
 
-            db.push(`public_pets`, {
+            await db.push(`public_pets`, {
                 owner: name,
                 pets: pets
             })
@@ -207,10 +246,10 @@ app.get("/api/pets/*", async (req, res) => {
             break;
 
         default:
-            if (db.get(`${req.user.email}.pets.happy`) == undefined) {
+            if (await db.get(`${req.user.email}.pets.happy`) == undefined) {
                 db.set(`${req.user.email}.pets.happy`, 100)
             }
-            if (db.get(`${req.user.email}.pets.time`) == undefined) {
+            if (await db.get(`${req.user.email}.pets.time`) == undefined) {
                 db.set(`${req.user.email}.pets.time`, getTime())
             }
             var newHapy = await getFood(req.user.email);
@@ -231,8 +270,9 @@ app.get("/api/pets/*", async (req, res) => {
 
 })
 app.post("/api/pets/*", async (req, res) => {
-    // var user = db.get(req.user.email)
-    var pets = db.get(`${req.user.email}.pets`)
+    // var user = await db.get(req.user.email)
+    var pets = await db.get(`${req.user.email}.pets`)
+    console.log(pets)
     var url = req.url.split("/")
     console.log(url[3])
 
@@ -241,7 +281,7 @@ app.post("/api/pets/*", async (req, res) => {
             console.log("add")
             var seal = await getSeal()
             console.log(seal)
-            db.set(`${req.user.email}.pets`, {
+            await db.set(`${req.user.email}.pets`, {
                 img: seal,
                 name: "Seal"
             })
@@ -253,7 +293,7 @@ app.post("/api/pets/*", async (req, res) => {
 
             //console.log(req)
             console.log(req.body)
-            db.set(`${req.user.email}.pets.name`, req.body.name)
+            await db.set(`${req.user.email}.pets.name`, req.body.name)
             res.redirect(`/pets`)
             break;
         case "feed":
@@ -266,7 +306,7 @@ app.post("/api/pets/*", async (req, res) => {
             break;
 
         case "allpets":
-            var all = db.fetchAll()
+            var all = await db.fetchAll()
             all.forEach(itom => {
                 if (itom.data.com.pets !== undefined) {
                     console.log(itom.data.com.pets)
@@ -306,11 +346,11 @@ app.get('/google/callback',
     passport.authenticate('google', {
         failureRedirect: '/failed',
     }),
-    function (req, res) {
-        var user = db.get(req.user.email)
+    async function (req, res) {
+        var user = await db.get(req.user.email)
         console.log(req.user)
 
-        db.set(`${req.user.email}.google`, {
+        await db.set(`${req.user.email}.google`, {
             id: req.user.sub,
             name: req.user.name,
             avatar: req.user.picture,
@@ -325,16 +365,16 @@ app.get('/discord/callback',
     passport.authenticate('discord', {
         failureRedirect: '/failed',
     }),
-    function (req, res) {
-        var user = db.get(req.user.email)
-        if (user !== null) {
-            db.set(`${req.user.email}.discord`, {
-                id: req.user.id,
-                name: req.user.username,
-                avatar: req.user.avatar,
-                email: req.user.email
-            })
-        }
+    async function (req, res) {
+        //var user = await db.get(req.user.email)
+
+        await db.set(`${req.user.email}.discord`, {
+            id: req.user.id,
+            name: req.user.username,
+            avatar: req.user.avatar,
+            email: req.user.email
+        })
+
         // console.log(req.user)
         res.redirect('/')
 
@@ -403,7 +443,7 @@ async function getFood(email) {
 
 
     var timeNow = new Date(getTime());
-    var user = db.get(email)
+    var user = await db.get(email)
     var happy = user.pets.happy
     var time = new Date(user.pets.time) //user.pets.time
     console.log(time)
@@ -423,7 +463,7 @@ async function getFood(email) {
 
     // subtract 2 for evey hour
     console.log(newHappy)
-   return newHappy
+    return newHappy
 }
 
 async function getSeal() {

@@ -84,7 +84,7 @@ window.onload = async function () {
             })
             pets.removeChild(public);
         }
-        //pets.appendChild(public);
+        pets.appendChild(public);
         private.onclick = async function () {
             //  document.getElementById("div").delete();
             pets.removeChild(private);
