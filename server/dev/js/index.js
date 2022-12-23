@@ -1,4 +1,3 @@
-// JavaScript Document
 window.onload = async function () {
 
     var resUser = await fetch("https://mypetseal.com/api/user/");
@@ -9,9 +8,9 @@ window.onload = async function () {
     } else {
         document.getElementById("login").innerText = jsonUser.name
         document.getElementById("login").href = "https://mypetseal.com/profile"
-        document.getElementById("pets").href = `https://mypetseal.com/pets/${jsonUser.id}/`
+        document.getElementById("pets").href = `https://mypetseal.com/pets/${jsonUser.id}`
         if (jsonUser.premium == true) {
-            document.getElementById("premium").innerText = "Premium"
+        document.getElementById("premium").innerText = "Premium"
         }
     }
 
@@ -20,5 +19,4 @@ window.onload = async function () {
     console.log(json)
     var bg = document.getElementById("bg");
     bg.src = json.img;
-    bg.className = "img"
 }

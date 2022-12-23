@@ -1,24 +1,28 @@
 {
-    "name": "MyPetSeal",
+    "name": "mypetseal",
     "version": "1.0.0",
     "description": "my pet seal is is a web server to run with a proxy server",
     "main": "server.js",
     "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "node server.js"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node server.js"
     },
-    "author": "un boxing man",
+    "author": "boxing hosting",
     "license": "MIT",
-  "dependencies": {
-    "@un-boxing-hosting/boxing-hosting-utils": "github:un-boxing-hosting/@un-boxing-hosting/boxing-hosting-utils",
-    "body-parser": "^1.20.0",
-    "cloudflare": "^2.9.1",
-    "express": "^4.18.1",
-    "fs-extra": "^10.1.0",
-    "http-proxy": "^1.18.1",
-    "morgan": "^1.10.0",
-    "node-fetch": "^3.2.7",
-    "serve-favicon": "^2.5.0",
-    "serve-index": "^1.9.1"
-  }
+    "dependencies": {
+        "@un-boxing-hosting/boxing-hosting-utils": "github:un-boxing-hosting/@un-boxing-hosting/boxing-hosting-utils",
+        "body-parser": "^1.20.0",
+        "cloudflare": "^2.9.1",
+        "express": "^4.18.1",
+        "fs-extra": "^10.1.0",
+        "http-proxy": "^1.18.1",
+        "morgan": "^1.10.0",
+        "node-fetch": "^2.6.6",
+        "passport": "^0.4.1",
+        "passport-paypal": "^0.3.0",
+        "passport-paypal-oauth": "^0.1.0",
+        "passport-paypal-token": "^2.1.0",
+        "serve-favicon": "^2.5.0",
+        "serve-index": "^1.9.1"
+    }
 }

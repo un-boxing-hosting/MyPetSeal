@@ -3,7 +3,8 @@ window.onload = async function () {
 
     var resUser = await fetch("https://mypetseal.com/api/user/");
     const jsonUser = await resUser.json()
-    var resPets = await fetch(`https://mypetseal.com/api/pets/`);
+    var resPets = await fetch(`https://mypetseal.com/api/pets/${jsonUser.id}/all`);
+    console.log(resPets)
     const jsonPets = await resPets.json()
     console.log(jsonUser)
     console.log(jsonPets)
@@ -16,205 +17,86 @@ window.onload = async function () {
     } else {
         document.getElementById("login").innerText = jsonUser.name
         document.getElementById("login").href = "https://mypetseal.com/profile"
-        document.getElementById("pets").href = `https://mypetseal.com/pets`
+        document.getElementById("pets").href = `https://mypetseal.com/pets/${jsonUser.id}/`
+        if (jsonUser.premium == true) {
+            document.getElementById("premium").innerText = "Premium"
+        }
     }
     if (jsonPets.pets == "not found") {
-        var petss = document.getElementById("petss");
-        document.getElementById("txt").innerText = " no pets found :("
-        var but = document.createElement("button");
-        var add = document.createElement("img");
-        add.src = "/pix/find-btn.png";
-        add.id = "add";
-        but.appendChild(add);
-        but.onclick = async function () {
-            var res = await fetch("https://mypetseal.com/api/pets/add", {
-                method: "POST"
-            });
-            const json = await res.json()
-            console.log(json)
-            if (json.success == true) {
-                window.location.reload();
-            }
-        }
 
-        petss.appendChild(but);
+        document.getElementById("txt").innerText = " no pets found :("
+        newPet(jsonPets, jsonUser);
 
 
     } else {
+        //get #public from adress bar
+        var url1 = window.location.href;
+        var url3 = url1.split("#");
 
-        const pets = document.getElementById("petss");
-        var public = document.createElement("button");
-        public.id = "public";
-        const div = document.createElement("div");
-        div.id = "div";
-        public.innerText = "Public Pets";
-        var private = document.createElement("button");
-        private.innerText = "Your Pet";
-        public.onclick = async function () {
-            if (document.getElementById("pdiv")) {
-                document.getElementById("pdiv").remove();
-            }
-            var res = await fetch("https://mypetseal.com/api/pets/public");
-            const json = await res.json()
-            console.log(json)
-
-            private.onclick = async function () {
-                pets.removeChild(private);
-
-                deletePub();
-                pet(jsonPets)
-            }
-            pets.appendChild(private);
-            json.pets.forEach(pet => {
-                console.log(pet)
-
-
-                var img = document.createElement("img");
-                var happy = document.createElement("p");
-                var owner = document.createElement("p");
-                owner.innerHTML = "Owner: " + pet.owner;
-                owner.id = "owner";
-                happy.innerHTML = "Happiness: " + pet.pets.happy + "/100";
-                happy.id = "happy";
-                img.src = pet.pets.img;
-                img.id = "img";
-                var name = document.createElement("p");
-                name.id = "name";
-                name.innerHTML = pet.pets.name;
-                name.style.fontSize = "30px";
-                pets.appendChild(div);
-                div.appendChild(name);
-                div.appendChild(happy);
-                div.appendChild(owner);
-                div.appendChild(img);
-            })
-            pets.removeChild(public);
-        }
-        pets.appendChild(public);
-        private.onclick = async function () {
-            //deletePub();
-            pets.removeChild(private);
-            pet(jsonPets)
-        }
-        pets.appendChild(private);
-
-
-
-
+        console.log(url3[0])
+        if (url3[0] == "public"){}
+        Pets(jsonPets, jsonUser)
     }
 }
-async function deletePub() {
-    //  document.getElementById("public").remove();
-    document.getElementById("name").remove();
-    document.getElementById("happy").remove();
-    document.getElementById("owner").remove();
-    document.getElementById("img").remove();
-    document.getElementById("div").remove();
-
-}
-async function deletePriv() {
-
-    document.getElementById("name").remove();
-    document.getElementById("happy").remove();
-    document.getElementById("img").remove();
-    document.getElementById("nameForm").remove();
-    document.getElementById("nameInput").remove();
-    document.getElementById("sub").remove();
-    document.getElementById("pdiv").remove();
-
-}
-
-async function pet(jsonPets) {
-    const publicc = document.createElement("button");
-    publicc.innerText = "Public Pets";
-    publicc.onclick = async function () {
-        window.location.reload();
-    }
+async function Pets(jsonPets, jsonUser) {
     const pets = document.getElementById("petss");
-    pets.appendChild(publicc);
-    if (jsonPets.public == null) {
-        var makepub = document.createElement("button");
-        makepub.innerText = "Make Pet Public";
-        makepub.onclick = async function () {
-            var res = await fetch("https://mypetseal.com/api/pets/setpublic");
-            const json = await res.json()
-            console.log(json)
-            if (json.success == true) {
-                window.location.reload();
-            }
-        }
-        pets.appendChild(makepub);
+    var public = document.createElement("button");
+    public.id = "public";
+    public.innerText = "Public Pets";
+    public.onclick = async function () {
+         window.location.href = `https://mypetseal.com/pets/public/`
     }
-    if (jsonPets.public == true) {
-        var makepub = document.createElement("button");
-        makepub.innerText = "Make Pet Private";
-        makepub.onclick = async function () {
-            var res = await fetch("https://mypetseal.com/api/pets/removepublic");
-            const json = await res.json()
-            console.log(json)
-            if (json.success == true) {
-                window.location.reload();
-            }
-        }
-        pets.appendChild(makepub);
+    pets.appendChild(public);
+
+    var table = document.createElement("table")
+    table.id = "table";
+    table.border = "1";
+    table.className = "center";
+    var tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+    var tr = document.createElement("tr");
+    var thName = document.createElement("th");
+    thName.innerHTML = "Name";
+    thName.scope = "col";
+    thName.style.backgroundColor = "#04AA6D";
+    tr.appendChild(thName);
+    table.appendChild(tr);
+
+
+    jsonPets.forEach(pet => {
+        console.log(pet)
+        var tr1 = document.createElement("tr");
+        var neme = document.createElement("td")
+        var a = document.createElement("a");
+        a.href = `https://mypetseal.com/pets/${jsonUser.id}/${pet.url}`;
+        a.innerText = pet.name;
+        neme.appendChild(a);
+        tr1.appendChild(neme);
+        table.appendChild(tr1);
+
+    });
+    pets.appendChild(table);
+    if (jsonUser.premium == true) {
+        newPet(jsonPets, jsonUser);
     }
-    var pdiv = document.createElement("div");
-    pdiv.id = "pdiv";
-    var img = document.createElement("img");
-    var happy = document.createElement("p");
-    img.id = "img";
-    happy.id = "happy";
-    happy.innerHTML = "Happiness: " + jsonPets.happy + "/100";
-    img.src = jsonPets.img;
-    var name = document.createElement("p");
-    name.id = "name";
-    name.innerHTML = jsonPets.name;
-    name.style.fontSize = "30px";
-    pets.appendChild(pdiv);
-    pdiv.appendChild(name);
-    pdiv.appendChild(happy);
-    pdiv.appendChild(img);
-
-
-
-    var form = document.createElement("form");
-    form.action = "/api/pets/name";
-    form.method = "POST";
-    form.enctype = "application/x-www-form-urlencoded";
-    form.id = "nameForm";
-    form.enterKeyHint = "submit";
-
-
-
-    var input = document.createElement("input");
-    input.id = "nameInput";
-    input.type = "text";
-    input.name = "name";
-    input.placeholder = "name";
-    var sub = document.createElement("input");
-    sub.id = "sub";
-    sub.type = "submit";
-    form.appendChild(input);
-    form.appendChild(sub);
-    pdiv.appendChild(form);
-
+}
+async function newPet(jsonPets, jsonUser) {
+    var petss = document.getElementById("petss");
     var but = document.createElement("button");
-    var name = document.createElement("img");
-    name.src = "/pix/feed-btn.png";
+    var add = document.createElement("img");
+    add.src = "/pix/find-btn.png";
+    but.id = "add";
+    but.appendChild(add);
     but.onclick = async function () {
-        var res = await fetch("https://mypetseal.com/api/pets/feed", {
+        var res = await fetch(`https://mypetseal.com/api/pets/${jsonUser.id}/add`, {
             method: "POST"
         });
         const json = await res.json()
         console.log(json)
         if (json.success == true) {
             window.location.reload();
-
         }
     }
-    but.appendChild(name);
-    pdiv.appendChild(but);
 
-
-
+    petss.appendChild(but);
 }

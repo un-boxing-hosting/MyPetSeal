@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+		<head>
+		<meta charset="utf-8">
+		 <meta name="og:title" content="My Pet Seal">
+  <meta name="og:description" content="Get yourself a pet seal!!">
+  <meta name="og:keywords" content="discord,unboxinghosting,un-boxing-hosting,un boxing hosting,pets,seals,seal,pet seals">
+  <meta name="og:author" content="By un boxing hosting">
+  <meta name="og:viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="og:image" content="https://www.mypetseal.com/pix/logo.png">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+	<head>
+		<meta charset="utf-8">
+	<title>premium</title>
+	<link href="css/style.css" rel="stylesheet" type="text/css">
+	</head>
+<body>
+	
+		<div id="nav" class="topnav">
+    <a  href="/">Home</a>
+    <a id="pets" href="/pets/">Pets</a>
+	  <a id="login" class="split" href="/login">Login</a>
+		<a id="premium" class="split"></a>
+		<a class="active" href="/premium"> Premium</a>
+		<a href="support">Discord</a>
+  </div>
+	<script type="text/javascript" src="./js/premium.js"></script>
+<div>
+	<h2> Premium benefits</h2>
+  <table border=".5">
+	<tr>
+		<th style="background: #04AA6D" scope="col" >Features</th>
+	  <th style="background: #04AA6D" scope="col" >Base</th>
+		<th style="background: #04AA6D" scope="col">Premium</th>
+		</tr>
+		<tr>
+		<th>Pubilc Pets</th>
+		  <th>YES</th>
+			<th>YES</th>
+		</tr>
+	<tr>
+	  <th>Multi Pets</th>
+			<th>NO</th>
+			<th>YES</th>
+		</tr>
+  </table>
+  <h2>More coming soon</h2>
+	<h3>We are a not-for-profit. Premium is for $1 or more donation</h3>
+</div>
+<div id="input">
+
+</div>
+ 		
+	<br>
+		<br>
+	<h3 id="paypal-text" >* PayPal buttons are avable once PayPal is linked in <a href="/profile">Profile</a></h3>
+	<br>
+        <div hidden="true" id="paypal-button-container"></div>
+        <!-- Sample PayPal credentials (client-id) are included -->
+        <script src="https://www.paypal.com/sdk/js?client-id=AfZZD2-tBw22vceVuT7k23Ah_syCWTFUI4ZTDkhbVYFXqELTgTdpzL7YL9mozWe-JUSSj718NiJrMLRv&currency=USD&intent=capture&enable-funding=venmo" data-sdk-integration-source="integrationbuilder"></script>
+        <script>
+          const paypalButtonsComponent = paypal.Buttons({
+              // optional styling for buttons
+              // https://developer.paypal.com/docs/checkout/standard/customize/buttons-style-guide/
+              style: {
+                color: "gold",
+                shape: "rect",
+                layout: "vertical"
+              },
+
+              // set up the transaction
+              createOrder: (data, actions) => {
+                  // pass in any options from the v2 orders create call:
+                  // https://developer.paypal.com/api/orders/v2/#orders-create-request-body
+
+
+                  const createOrderPayload = {
+
+                      purchase_units: [
+                          {
+                              amount: {
+                                  value: document.getElementById("amount").value,
+                                    currency_code: "USD",
+                                    breakdown :{
+                                      item_total: {
+                                        currency_code: "USD",
+                                        value: document.getElementById("amount").value
+                                      }
+                                    }
+                              },
+                            items: [
+                              {
+                                name: "Premium",
+                                description: "Premium for all boxing hosting services",
+                                unit_amount: {
+                                  currency_code: "USD",
+                                  value: document.getElementById("amount").value 
+                                },
+                                quantity: "1"
+                              }
+                            ]
+                          },
+                      
+                        ]
+                  };
+
+                  return actions.order.create(createOrderPayload);
+              },
+
+              // finalize the transaction
+              onApprove: (data, actions) => {
+                  const captureOrderHandler = (details) => {
+                      const payerName = details.payer.name.given_name;
+                      console.log(details);
+                      fetch("/api/paypal/finshed", {
+                          method: "POST",
+                          headers: {
+                              "Content-Type": "application/json"
+                          },
+                          body: JSON.stringify({
+                              orderID: details.id,
+                              payerID: details.payer.payer_id,
+                              payerEmail: details.payer.email_address,
+                          })
+                      }).then((res) => {
+                          if (res.status === 200) {
+                              alert("Thank you for your donation, " + payerName + "!")
+                              setTimeout(() => {
+                                  window.location.href = "/premium";
+                              }, 1000);
+                          } 
+                      })
+                      .catch(err => {
+                          console.error(err);
+                          alert("There was an error processing your transaction.");
+                      });
+                      console.log('Transaction completed');
+                  };
+
+                  return actions.order.capture().then(captureOrderHandler);
+              },
+
+              // handle unrecoverable errors
+              onError: (err) => {
+                  console.error(err);
+                  console.error('An error prevented the buyer from checking out with PayPal');
+              }
+          });
+
+          paypalButtonsComponent
+              .render("#paypal-button-container")
+              .catch((err) => {
+                  console.error('PayPal Buttons failed to render');
+              });
+        </script>
+ 
+
+	
+	</body>
+	<div class="footer">
+	<a  href="/support" style="color: red" >Support</a>
+    <a href="/Privacy-Policy">Privacy Policy</a>
+    <a href="/Terms-of-Service">Terms of Service</a>
+<a href="https://hosting.unboxingman.com">Made by Boxing Hosting</a>
+	</div>
+
+</html>
