@@ -4,7 +4,7 @@ const util = require(`@un-boxing-hosting/boxing-hosting-utils`)
 const Discord = require(`discord.js`);
 const REST = require('@discordjs/rest').REST;
 const db = require('quick.db');
-const utils = new util();
+const utils = new util.Client();
 const list = utils.getIDList();
 const stafflist = utils.getStaffList();
 //#endregion

@@ -15,7 +15,7 @@ window.onload = async function () {
     } else {
         document.getElementById("login").innerText = jsonUser.name
         document.getElementById("login").href = "https://mypetseal.com/profile"
-        document.getElementById("pets").href = `https://mypetseal.com/pets/${jsonUser.id}/`
+        document.getElementById("pets").href = `https://mypetseal.com/pets/${jsonUser.id}`
     }
     //if (jsonPets.pets == "not found") {
     // document.getElementById("txt").innerText = " no pets found :("
@@ -78,49 +78,10 @@ window.onload = async function () {
         Google.appendChild(Googleimg);
 
     }
-    if (jsonFull.paypal === undefined) {
-
-        var paypal = document.createElement("div");
-        var liked = document.createElement("p");
-        liked.innerHTML = "PayPal : un Linked";
-        var button = document.createElement("button");
-        var img = document.createElement("img");
-        img.src = "/pix/log-in-with-paypal-button.png";
-        //img.width = "100px";
-        // img.height = "50px";
-        button.appendChild(img);
-        button.onclick = function () {
-            window.location.href = "https://mypetseal.com/paypal";
-        }
-
-        profile.appendChild(paypal);
-        paypal.appendChild(liked);
-        paypal.appendChild(button);
-    }
-    if (jsonFull.paypal !== undefined) {
-
-
-        var paypal = document.createElement("div");
-        var liked = document.createElement("p");
-        liked.innerHTML = "PayPal : Linked";
-        var paypalName = document.createElement("p");
-        paypalName.innerHTML = "PayPal Payer ID: " + jsonFull.paypal.id;
-        // var paypalId = document.createElement("p");
-        // paypalId.innerHTML = "PayPal id: " + jsonFull.paypal.longID;
-        var paypalEmail = document.createElement("p");
-        paypalEmail.innerHTML = "PayPal email: " + jsonFull.paypal.email;
-        paypal.appendChild(liked);
-        paypal.appendChild(paypalName);
-        // paypal.appendChild(paypalId);
-        paypal.appendChild(paypalEmail);
-       // paypal.appendChild(button);
-       profile.appendChild(paypal);
-
-    }
     var premium = document.createElement("p");
     premium.innerHTML = "Premium: " + jsonUser.premium;
     profile.appendChild(premium);
-    if (jsonUser.cookie == true) {
+    if(jsonUser.cookie == true){
         var cookie = document.createElement("p");
         cookie.innerHTML = "Cookie: " + jsonUser.cookie;
         profile.appendChild(cookie);
